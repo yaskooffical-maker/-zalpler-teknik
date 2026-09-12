@@ -1,0 +1,6 @@
+{
+  "name": "Özalpler",
+  "description": "Özalpler Teknik Beyaz Eşya Servisi - Servis talebi kayıt sistemi, müşteri ve yetkili servis paneli.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
