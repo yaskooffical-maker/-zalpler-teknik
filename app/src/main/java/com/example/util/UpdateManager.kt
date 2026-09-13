@@ -22,8 +22,8 @@ object UpdateManager {
     private const val PREFS_NAME = "ozalpler_update_prefs"
     private const val KEY_UPDATE_JSON_URL = "update_json_url"
 
-    // Default JSON update endpoint (User can customize this anytime from the app's settings)
-    const val DEFAULT_UPDATE_URL = "https://raw.githubusercontent.com/yaskooffical/ozalpler-app/main/version.json"
+    // Default JSON update endpoint pointing to user's GitHub repository
+    const val DEFAULT_UPDATE_URL = "https://raw.githubusercontent.com/yaskooffical-maker/-zalpler-teknik/main/version.json"
 
     private val client by lazy {
         OkHttpClient.Builder()

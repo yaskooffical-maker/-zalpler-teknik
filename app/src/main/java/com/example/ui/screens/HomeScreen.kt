@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.BuildConfig
 import com.example.ui.theme.AccentSkyBlue
 import com.example.ui.theme.BorderBlue
 import com.example.ui.theme.BorderHighlight
@@ -84,6 +86,7 @@ fun HomeScreen(
     onRequestService: (selectedService: String) -> Unit,
     onNavigateToMyRequests: () -> Unit,
     onSwitchToAdmin: () -> Unit,
+    onCheckForUpdates: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -492,6 +495,74 @@ fun HomeScreen(
                     tint = AccentSkyBlue,
                     modifier = Modifier.size(14.dp)
                 )
+            }
+        }
+
+        // App Version & Update Check Card
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+                .clickable(onClick = onCheckForUpdates)
+                .testTag("card_check_updates_home"),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(containerColor = DarkCard),
+            border = androidx.compose.foundation.BorderStroke(1.dp, BorderBlue)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 13.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(DarkSurface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SystemUpdate,
+                            contentDescription = null,
+                            tint = AccentSkyBlue,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = "Özalpler Teknik v${BuildConfig.VERSION_NAME}",
+                            color = TextWhite,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Uygulama İçi Güncellemeleri Denetle",
+                            color = TextLightBlue,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(BrandBlue)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "Denetle",
+                        color = TextWhite,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

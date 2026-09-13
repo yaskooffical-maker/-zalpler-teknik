@@ -2,6 +2,7 @@ package com.example
 
 import android.app.Application
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.data.model.AppUpdateInfo
+import com.example.ui.components.AdminLoginDialog
 import com.example.ui.components.UpdateDialog
 import com.example.ui.components.UpdateDownloadState
 import com.example.ui.screens.AdminPanelScreen
@@ -107,6 +109,16 @@ fun OzalplerApp() {
     var currentPanel by remember { mutableStateOf(PanelMode.CUSTOMER) }
     var customerScreen by remember { mutableStateOf(CustomerScreen.HOME) }
     var selectedServiceType by remember { mutableStateOf("") }
+    var isAdminAuthenticated by remember { mutableStateOf(false) }
+    var showAdminLoginDialog by remember { mutableStateOf(false) }
+
+    val requestAdminAccess = {
+        if (isAdminAuthenticated) {
+            currentPanel = PanelMode.ADMIN
+        } else {
+            showAdminLoginDialog = true
+        }
+    }
 
     val coroutineScope = rememberCoroutineScope()
     var availableUpdate by remember { mutableStateOf<AppUpdateInfo?>(null) }
@@ -120,6 +132,31 @@ fun OzalplerApp() {
             val update = result.getOrNull()
             if (update != null) {
                 availableUpdate = update
+            }
+        }
+    }
+
+    val checkUpdatesManually: () -> Unit = {
+        coroutineScope.launch {
+            Toast.makeText(context, "Güncellemeler denetleniyor...", Toast.LENGTH_SHORT).show()
+            val result = UpdateManager.checkForUpdate(context)
+            if (result.isSuccess) {
+                val update = result.getOrNull()
+                if (update != null) {
+                    availableUpdate = update
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Uygulamanız en güncel sürümde (v${BuildConfig.VERSION_NAME})",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } else {
+                Toast.makeText(
+                    context,
+                    "Güncelleme kontrolü başarısız: ${result.exceptionOrNull()?.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -144,7 +181,7 @@ fun OzalplerApp() {
                         customerScreen = CustomerScreen.CREATE_REQUEST
                     },
                     onNavigateMyRequests = { customerScreen = CustomerScreen.MY_REQUESTS },
-                    onNavigateAdmin = { currentPanel = PanelMode.ADMIN },
+                    onNavigateAdmin = requestAdminAccess,
                     onCall = { ContactUtils.call(context) }
                 )
             }
@@ -175,9 +212,8 @@ fun OzalplerApp() {
                                     onNavigateToMyRequests = {
                                         customerScreen = CustomerScreen.MY_REQUESTS
                                     },
-                                    onSwitchToAdmin = {
-                                        currentPanel = PanelMode.ADMIN
-                                    }
+                                    onSwitchToAdmin = requestAdminAccess,
+                                    onCheckForUpdates = checkUpdatesManually
                                 )
                             }
                             CustomerScreen.CREATE_REQUEST -> {
@@ -207,6 +243,7 @@ fun OzalplerApp() {
                     AdminPanelScreen(
                         viewModel = viewModel,
                         onSwitchToCustomerPanel = {
+                            isAdminAuthenticated = false
                             currentPanel = PanelMode.CUSTOMER
                             customerScreen = CustomerScreen.HOME
                         },
@@ -218,6 +255,18 @@ fun OzalplerApp() {
                 }
             }
         }
+    }
+
+    // Admin Login Dialog (Password protected: admin / 1818)
+    if (showAdminLoginDialog) {
+        AdminLoginDialog(
+            onDismiss = { showAdminLoginDialog = false },
+            onLoginSuccess = {
+                isAdminAuthenticated = true
+                showAdminLoginDialog = false
+                currentPanel = PanelMode.ADMIN
+            }
+        )
     }
 
     // App Update Dialog

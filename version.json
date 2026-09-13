@@ -1,0 +1,8 @@
+{
+  "versionCode": 3,
+  "versionName": "3.0",
+  "apkUrl": "https://github.com/yaskooffical-maker/-zalpler-teknik/releases/download/v3.0.0/ozalpler.apk",
+  "releaseNotes": "• Sürüm 3.0 yayınlandı.\n• Şifreli yetkili giriş paneli (admin / 1818).\n• Müşteri talepleri ve kayıtları silme özelliği eklendi.\n• Müşteri arama ve servis filtreleme geliştirmeleri.\n• Uygulama içerisinden doğrudan güncelleme ve APK kurulumu.",
+  "fileSizeMb": 18.5,
+  "forceUpdate": false
+}

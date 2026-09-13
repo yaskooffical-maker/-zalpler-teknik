@@ -114,6 +114,24 @@ class ExampleRobolectricTest {
       localName = "1.2.0"
     )
     assertEquals(true, isHigherSemver)
+
+    // v3 higher than v2
+    val isV3HigherThanV2 = manager.isVersionHigher(
+      remoteCode = 3,
+      remoteName = "3.0",
+      localCode = 2,
+      localName = "2.0"
+    )
+    assertEquals(true, isV3HigherThanV2)
+
+    // v3 remote vs v3 local is not higher
+    val isV3RemoteVsV3Local = manager.isVersionHigher(
+      remoteCode = 3,
+      remoteName = "3.0",
+      localCode = 3,
+      localName = "3.0"
+    )
+    assertEquals(false, isV3RemoteVsV3Local)
   }
 
   @Test
@@ -127,5 +145,22 @@ class ExampleRobolectricTest {
 
     manager.resetUpdateJsonUrl(context)
     assertEquals(com.example.util.UpdateManager.DEFAULT_UPDATE_URL, manager.getUpdateJsonUrl(context))
+  }
+
+  @Test
+  fun `admin authentication with credentials`() {
+    val auth = com.example.ui.components.AdminAuth
+
+    // Valid credentials (trimming supported)
+    assertEquals(true, auth.isValid("admin", "1818"))
+    assertEquals(true, auth.isValid(" Admin ", "1818"))
+    assertEquals(true, auth.isValid("ADMIN", "1818"))
+    assertEquals(true, auth.isValid("admin", " 1818 "))
+
+    // Invalid credentials
+    assertEquals(false, auth.isValid("admin", "1234"))
+    assertEquals(false, auth.isValid("user", "1818"))
+    assertEquals(false, auth.isValid("", ""))
+    assertEquals(false, auth.isValid("admin", "wrong_password"))
   }
 }

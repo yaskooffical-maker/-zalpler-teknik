@@ -166,7 +166,7 @@ fun AdminPanelScreen(
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Müşteri Modu", color = TextWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text("Çıkış Yap", color = TextWhite, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -247,7 +247,7 @@ fun AdminPanelScreen(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { viewModel.searchQuery.value = it },
-            placeholder = { Text("Müşteri, telefon, cihaz veya adres ara...", color = TextDim, fontSize = 13.sp) },
+            placeholder = { Text("Müşteri Ara...", color = TextDim, fontSize = 13.sp) },
             leadingIcon = {
                 Icon(Icons.Default.Search, contentDescription = null, tint = AccentSkyBlue, modifier = Modifier.size(18.dp))
             },
@@ -353,7 +353,8 @@ fun AdminPanelScreen(
                             ContactUtils.messageCustomer(context, request.customerPhone, msg)
                         },
                         onOpenMap = { ContactUtils.openMapLocation(context, request.address) },
-                        onManage = { managingRequest = request }
+                        onManage = { managingRequest = request },
+                        onDeleteRequest = { requestToDelete = request }
                     )
                 }
 
@@ -473,7 +474,8 @@ fun AdminRequestCard(
     onCallCustomer: () -> Unit,
     onMessageCustomer: () -> Unit,
     onOpenMap: () -> Unit,
-    onManage: () -> Unit
+    onManage: () -> Unit,
+    onDeleteRequest: () -> Unit
 ) {
     val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
     val dateString = dateFormat.format(Date(request.createdAt))
@@ -504,7 +506,7 @@ fun AdminRequestCard(
         border = androidx.compose.foundation.BorderStroke(1.dp, BorderBlue)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header: Customer Name & Status Badge
+            // Header: Customer Name & Status Badge + Delete Icon
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -537,18 +539,38 @@ fun AdminRequestCard(
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(statusBg)
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = request.status,
-                        color = statusColor,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(statusBg)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = request.status,
+                            color = statusColor,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    IconButton(
+                        onClick = onDeleteRequest,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF381313))
+                            .testTag("admin_header_delete_${request.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Talebi Sil",
+                            tint = ErrorRed,
+                            modifier = Modifier.size(15.dp)
+                        )
+                    }
                 }
             }
 
@@ -645,37 +667,38 @@ fun AdminRequestCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Action Buttons Row
+            // Action Buttons Row 1: Müşteri Ara, WhatsApp, Harita
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // Call
+                // Call -> Müşteri Ara
                 Button(
                     onClick = onCallCustomer,
                     modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp),
+                        .weight(1.2f)
+                        .height(40.dp)
+                        .testTag("admin_call_customer_${request.id}"),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = CallButtonBg),
                     border = androidx.compose.foundation.BorderStroke(1.dp, BorderBlue)
                 ) {
-                    Icon(Icons.Default.Call, contentDescription = null, tint = AccentSkyBlue, modifier = Modifier.size(15.dp))
+                    Icon(Icons.Default.Call, contentDescription = null, tint = AccentSkyBlue, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Ara", color = TextWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("Müşteri Ara", color = TextWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
 
                 // WhatsApp
                 Button(
                     onClick = onMessageCustomer,
                     modifier = Modifier
-                        .weight(1.2f)
+                        .weight(1.1f)
                         .height(40.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = SmallButtonBg),
                     border = androidx.compose.foundation.BorderStroke(1.dp, BorderBlue)
                 ) {
-                    Icon(Icons.Default.Chat, contentDescription = null, tint = AccentSkyBlue, modifier = Modifier.size(15.dp))
+                    Icon(Icons.Default.Chat, contentDescription = null, tint = AccentSkyBlue, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("WhatsApp", color = TextWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
@@ -690,23 +713,48 @@ fun AdminRequestCard(
                     colors = ButtonDefaults.buttonColors(containerColor = SmallButtonBg),
                     border = androidx.compose.foundation.BorderStroke(1.dp, BorderBlue)
                 ) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = AccentSkyBlue, modifier = Modifier.size(15.dp))
+                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = AccentSkyBlue, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Harita", color = TextWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
+            }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Action Buttons Row 2: Talebi Yönet / Not Ekle + Talebi Sil
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 // Manage / Edit
                 Button(
                     onClick = onManage,
                     modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp),
+                        .weight(1.5f)
+                        .height(40.dp)
+                        .testTag("admin_manage_btn_${request.id}"),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = BrandBlue)
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null, tint = TextWhite, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Yönet", color = TextWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("Talebi Yönet", color = TextWhite, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+
+                // Direct Delete Button
+                Button(
+                    onClick = onDeleteRequest,
+                    modifier = Modifier
+                        .weight(1.1f)
+                        .height(40.dp)
+                        .testTag("admin_delete_btn_${request.id}"),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF381313)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ErrorRed)
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = null, tint = ErrorRed, modifier = Modifier.size(14.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Talebi Sil", color = ErrorRed, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
